@@ -5,25 +5,75 @@
 static void lcd_write_word(unsigned char low_byte, unsigned char high_byte);
 static unsigned char lcd_read_status_mask(unsigned char mask);
 
-void lcd_init(void)
-{
-    lcd_clear();
-    font_selection(LCD_6x8_FONT);
+const LCDInitConfig LCD_INIT_DEFAULT = {
+    LCD_6x8_FONT,
+    LCD_TEXT_HOME_LOW,
+    LCD_TEXT_HOME_HIGH,
+    (unsigned char)LCD_TEXT_AREA_COLUMNS,
+    0x00u,
+    LCD_GRAPHIC_HOME_LOW,
+    LCD_GRAPHIC_HOME_HIGH,
+    (unsigned char)LCD_GRAPHIC_AREA_COLUMNS,
+    0x00u,
+    LCD_CMD_TEXT_ON_GRAPHIC_OFF,
+    1u
+};
 
-    lcd_write_word(LCD_TEXT_HOME_LOW, LCD_TEXT_HOME_HIGH);
+const LCDInitConfig LCD_INIT_TEXT_8X8 = {
+    LCD_8x8_FONT,
+    LCD_TEXT_HOME_LOW,
+    LCD_TEXT_HOME_HIGH,
+    (unsigned char)LCD_TEXT_AREA_COLUMNS,
+    0x00u,
+    LCD_GRAPHIC_HOME_LOW,
+    LCD_GRAPHIC_HOME_HIGH,
+    (unsigned char)LCD_GRAPHIC_AREA_COLUMNS,
+    0x00u,
+    LCD_CMD_TEXT_ON_GRAPHIC_OFF,
+    1u
+};
+
+const LCDInitConfig LCD_INIT_BOTH_6X8 = {
+    LCD_6x8_FONT,
+    LCD_TEXT_HOME_LOW,
+    LCD_TEXT_HOME_HIGH,
+    (unsigned char)LCD_TEXT_AREA_COLUMNS,
+    0x00u,
+    LCD_GRAPHIC_HOME_LOW,
+    LCD_GRAPHIC_HOME_HIGH,
+    (unsigned char)LCD_GRAPHIC_AREA_COLUMNS,
+    0x00u,
+    LCD_CMD_TEXT_ON_GRAPHIC_ON,
+    1u
+};
+
+void lcd_init(const LCDInitConfig *config)
+{
+    const LCDInitConfig *active_config;
+
+    active_config = (config != 0) ? config : &LCD_INIT_DEFAULT;
+
+    lcd_clear();
+
+    font_selection(active_config->font_type);
+
+    lcd_write_word(active_config->text_home_low, active_config->text_home_high);
     lcd_write_command(LCD_CMD_SET_TEXT_HOME_ADDRESS);
 
-    lcd_write_word((unsigned char)LCD_TEXT_AREA_COLUMNS, 0x00u);
+    lcd_write_word(active_config->text_area_low, active_config->text_area_high);
     lcd_write_command(LCD_CMD_SET_TEXT_AREA);
 
-    lcd_write_word(LCD_GRAPHIC_HOME_LOW, LCD_GRAPHIC_HOME_HIGH);
+    lcd_write_word(active_config->graphic_home_low, active_config->graphic_home_high);
     lcd_write_command(LCD_CMD_SET_GRAPHIC_HOME_ADDRESS);
 
-    lcd_write_word((unsigned char)LCD_GRAPHIC_AREA_COLUMNS, 0x00u);
+    lcd_write_word(active_config->graphic_area_low, active_config->graphic_area_high);
     lcd_write_command(LCD_CMD_SET_GRAPHIC_AREA);
 
-    lcd_write_command(LCD_CMD_TEXT_ON_GRAPHIC_OFF);
-    lcd_clear_ram();
+    lcd_write_command(active_config->display_mode);
+
+    if (active_config->clear_ram) {
+        lcd_clear_ram();
+    }
 }
 
 void lcd_clear(void)

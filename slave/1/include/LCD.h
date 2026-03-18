@@ -5,7 +5,7 @@
 #include "LCD_COMMAND.h"
 
 
-void lcd_init(void);
+void lcd_init(const LCDInitConfig *config);
 void lcd_clear(void);
 void lcd_write_command(unsigned char cmd);
 void lcd_write_data(unsigned char data);

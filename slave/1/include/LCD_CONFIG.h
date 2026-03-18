@@ -24,4 +24,22 @@
 #define LCD_GRAPHIC_HOME_HIGH    0x10u
 #define LCD_GRAPHIC_AREA_COLUMNS 40u
 
+typedef struct LCDInitConfig {
+	unsigned char font_type;
+	unsigned char text_home_low;
+	unsigned char text_home_high;
+	unsigned char text_area_low;
+	unsigned char text_area_high;
+	unsigned char graphic_home_low;
+	unsigned char graphic_home_high;
+	unsigned char graphic_area_low;
+	unsigned char graphic_area_high;
+	unsigned char display_mode;
+	unsigned char clear_ram;
+} LCDInitConfig;
+
+extern const LCDInitConfig LCD_INIT_DEFAULT;
+extern const LCDInitConfig LCD_INIT_TEXT_8X8;
+extern const LCDInitConfig LCD_INIT_BOTH_6X8;
+
 #endif
