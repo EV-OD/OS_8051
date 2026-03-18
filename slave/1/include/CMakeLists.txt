@@ -1,0 +1,5 @@
+set(OS8051_SLAVE1_INCLUDE_DIRS
+    "${PROJECT_SOURCE_DIR}/slave/1/include"
+    "${PROJECT_SOURCE_DIR}/include"
+    ${OS8051_SDCC_INCLUDE_DIRS}
+)
