@@ -7,4 +7,6 @@ set(OS8051_SLAVE1_C_SOURCES
 set(OS8051_SLAVE1_HEADERS
     "${PROJECT_SOURCE_DIR}/slave/1/include/slave1.h"
     "${PROJECT_SOURCE_DIR}/slave/1/include/LCD.h"
+    "${PROJECT_SOURCE_DIR}/slave/1/include/LCD_CONFIG.h"
+    "${PROJECT_SOURCE_DIR}/slave/1/include/LCD_COMMAND.h"
 )
