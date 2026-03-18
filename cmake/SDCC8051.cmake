@@ -137,5 +137,8 @@ function(sdcc8051_add_firmware target_name)
         VERBATIM
     )
 
+    set_property(GLOBAL APPEND PROPERTY OS8051_HEX_FILES "${linker_hex}")
+    set_property(GLOBAL APPEND PROPERTY OS8051_FIRMWARE_TARGETS "${target_name}")
+
     add_custom_target(${target_name} ALL DEPENDS "${linker_hex}")
 endfunction()

@@ -40,6 +40,15 @@ This builds both firmware images:
 - master: `build/master/master.hex`
 - slave 1: `build/slave/1/slave1/slave1.hex`
 
+It also exports the hex files automatically to:
+
+- `/home/rabin/.var/app/com.usebottles.bottles/data/bottles/bottles/Proteus_Lab/drive_c/users/Public/OS_8051_hex/`
+
+Exported filenames:
+
+- `master.hex`
+- `slave1.hex`
+
 ## Build One Target
 
 ```sh
