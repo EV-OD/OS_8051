@@ -1,3 +1,5 @@
+#include <reg51.h>
+
 #ifndef OS8051_SLAVE1_H
 #define OS8051_SLAVE1_H
 

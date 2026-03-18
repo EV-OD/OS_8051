@@ -5,9 +5,21 @@
             "includePath": [
                 "${workspaceFolder}/**",
                 "/home/rabin/.vscode/extensions/kelify.kelify-0.0.7/assets/headers",
+                "/usr/share/sdcc/include/mcs51",
                 "/usr/share/sdcc/include"
             ],
-            "defines": [],
+            "defines": [
+                "__data=",
+                "__idata=",
+                "__xdata=",
+                "__code=",
+                "__bit=",
+                "__at=",
+                "__using=",
+                "__reentrant=",
+                "__critical=",
+                "__naked="
+            ],
             "compilerPath": "/usr/bin/gcc",
             "cStandard": "c11",
             "cppStandard": "c++17",
