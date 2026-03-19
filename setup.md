@@ -1,4 +1,4 @@
-# Setup
+# Setup for OS_8051
 
 This workspace builds 8051 firmware with SDCC and CMake.
 
