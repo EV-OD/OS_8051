@@ -138,4 +138,35 @@ function(sdcc8051_add_firmware target_name)
     )
 
     add_custom_target(${target_name} ALL DEPENDS "${linker_hex}")
+
+    set_property(GLOBAL APPEND PROPERTY OS8051_HEX_FILES "${linker_hex}")
+endfunction()
+
+function(sdcc8051_add_hex_export_target destination_dir)
+    get_property(export_hex_files GLOBAL PROPERTY OS8051_HEX_FILES)
+
+    if(NOT export_hex_files)
+        return()
+    endif()
+
+    list(REMOVE_DUPLICATES export_hex_files)
+
+    set(export_hex_commands
+        COMMAND "${CMAKE_COMMAND}" -E make_directory "${destination_dir}"
+    )
+
+    foreach(hex_file IN LISTS export_hex_files)
+        get_filename_component(hex_name "${hex_file}" NAME)
+        list(APPEND export_hex_commands
+            COMMAND "${CMAKE_COMMAND}" -E copy_if_different
+                "${hex_file}"
+                "${destination_dir}/${hex_name}"
+        )
+    endforeach()
+
+    add_custom_target(export_hex ALL
+        ${export_hex_commands}
+        DEPENDS ${export_hex_files}
+        VERBATIM
+    )
 endfunction()

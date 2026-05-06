@@ -7,6 +7,11 @@ find_program(SDAS8051_EXECUTABLE sdas8051 REQUIRED)
 find_program(SDLD_EXECUTABLE sdld REQUIRED)
 find_program(PACKIHX_EXECUTABLE packihx REQUIRED)
 
+set(OS8051_HEX_EXPORT_DIR
+    "/home/rabin/.var/app/com.usebottles.bottles/data/bottles/bottles/Proteus_Lab/drive_c/users/Public/OS_8051_hex"
+    CACHE PATH "Directory where built HEX files are copied"
+)
+
 set(OS8051_SDCC_INCLUDE_DIRS
     "/home/rabin/.vscode/extensions/kelify.kelify-0.0.7/assets/headers"
     "/usr/share/sdcc/include"
@@ -31,3 +36,5 @@ sdcc8051_add_firmware(master
 )
 
 add_subdirectory(slave)
+
+sdcc8051_add_hex_export_target("${OS8051_HEX_EXPORT_DIR}")
