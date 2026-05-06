@@ -133,6 +133,7 @@ void lcd_puts(unsigned char col, unsigned char row,
     unsigned char c = col;
     unsigned char r = row;
     unsigned int  addr;
+    
 
     if (!str) return;
 
@@ -145,7 +146,12 @@ void lcd_puts(unsigned char col, unsigned char row,
 
     while (*str)
     {
-        lcd_auto_write(*str++);
+        unsigned char character = *str++;
+        if (character >= 0x20) {
+            character -= 0x20; 
+        }
+
+        lcd_auto_write(character);
         c++;
         if (c >= COLS)          /* soft wrap */
         {

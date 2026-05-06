@@ -179,22 +179,43 @@ void gfx_vline(unsigned char x, unsigned char y1, unsigned char y2)
 void gfx_line(unsigned char x1, unsigned char y1,
               unsigned char x2, unsigned char y2)
 {
-    signed char  dx, dy, sx, sy, err, e2;
+    // Use int for everything involved in the error calculation
+    int dx, dy, err, e2;
+    signed char sx, sy;
 
-    dx  = (signed char)abs_diff(x2, x1);
-    dy  = (signed char)abs_diff(y2, y1);
-    sx  = (x1 < x2) ?  1 : -1;
-    sy  = (y1 < y2) ?  1 : -1;
+    // Calculate absolute distances
+    if (x1 < x2) { dx = (int)(x2 - x1); sx = 1; }
+    else         { dx = (int)(x1 - x2); sx = -1; }
+
+    if (y1 < y2) { dy = (int)(y2 - y1); sy = 1; }
+    else         { dy = (int)(y1 - y2); sy = -1; }
+
+    // err = dx - dy
     err = dx - dy;
 
     while (1)
     {
         gfx_pixel(x1, y1, PIXEL_SET);
+
+        // Exit condition
         if (x1 == x2 && y1 == y2) break;
 
-        e2 = (signed char)(err * 2);
-        if (e2 > -dy) { err -= dy; x1 = (unsigned char)(x1 + sx); }
-        if (e2 <  dx) { err += dx; y1 = (unsigned char)(y1 + sy); }
+        e2 = err << 1; // 2 * err
+
+        // Vertical step check
+        // We compare e2 with -dy. Since dy is positive, -dy is negative.
+        if (e2 > -dy) 
+        { 
+            err -= dy; 
+            x1 = (unsigned char)(x1 + sx); 
+        }
+
+        // Horizontal step check
+        if (e2 < dx) 
+        { 
+            err += dx; 
+            y1 = (unsigned char)(y1 + sy); 
+        }
     }
 }
 
