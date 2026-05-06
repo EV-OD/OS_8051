@@ -5,4 +5,5 @@ set(OS8051_MASTER_C_SOURCES
 
 set(OS8051_MASTER_HEADERS
     "${PROJECT_SOURCE_DIR}/include/firmware.h"
+    "${PROJECT_SOURCE_DIR}/include/gpu_controller.h"
 )

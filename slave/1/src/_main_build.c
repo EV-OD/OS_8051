@@ -1,7 +1,6 @@
 #include "slave1.h"
 #include "setup.h"
 #include "graphics.h"
-#include "gpu.h"
 
 void main(void)
 {
@@ -16,8 +15,8 @@ void main(void)
         // // gfx_line(4, 4, 235, 123);          /* diagonal corner-to-corner   */
         // // gfx_line(235, 4, 4, 123);
 
-        const __code unsigned char x_sprite[] = { 0x88, 0x50, 0x20, 0x50, 0x88 };
-        gfx_bitmap(10, 10, 5, 5, x_sprite);
+        // const __code unsigned char x_sprite[] = { 0x88, 0x50, 0x20, 0x50, 0x88 };
+        // gfx_bitmap(10, 10, 5, 5, x_sprite);
 
         // gfx_circle(120, 64, 40);           /* centred hollow circle       */
         // gfx_fill_circle(120, 64, 15);      /* solid inner dot             */
@@ -28,8 +27,5 @@ void main(void)
         // /* ── text overlay ── */
         // lcd_set_display_mode(CMD_DISP_BOTH_ON);
         // // lcd_puts(3, 0, (__code unsigned char *)"LM3229 READY");
-
-
-        gpu_process_commands();
     }
 }
