@@ -16,6 +16,7 @@
 #define CMD_RECT     0x04
 #define CMD_BITMAP   0x05
 #define CMD_PIXEL    0x06
+#define CMD_FIXED    0x07
 
 /* ═══════════════════════════════════════════════════════════════
  * CORE COMMUNICATION & CONTROL

@@ -121,6 +121,6 @@ void gfx_invert_rect(unsigned char x1, unsigned char y1,
  */
 void gfx_bitmap(unsigned char x,    unsigned char y,
                 unsigned char w,    unsigned char h,
-                const unsigned char *data);
+                unsigned char *data);
 
 #endif /* GRAPHICS_H */

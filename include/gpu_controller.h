@@ -15,6 +15,7 @@
 #define CMD_RECT     0x04
 #define CMD_BITMAP   0x05
 #define CMD_PIXEL    0x06
+#define CMD_FIXED    0x07
 
 /**
  * Internal helper to send a single byte with a hardware handshake.
@@ -78,6 +79,10 @@ void gpu_set_pixel(unsigned char x, unsigned char y, unsigned char state) {
     gpu_write(state);
 }
 
+void gpu_draw_fixed(){
+    gpu_write(CMD_FIXED);
+}
+
 
 
 /**
@@ -88,10 +93,9 @@ void gpu_draw_bitmap(unsigned char x, unsigned char y,
                      unsigned char w, unsigned char h, 
                      const __code unsigned char *bmp_data) {
     unsigned int i;
-    unsigned int total_bytes;
 
     // Calculate how many bytes to send based on dimensions
-    total_bytes = (unsigned int)((w + 7) / 8) * (unsigned int)h;
+    unsigned int total_bytes = ((unsigned int)(w + 7u) / 8u) * (unsigned int)h;
 
     gpu_write(CMD_BITMAP);
     gpu_write(x);

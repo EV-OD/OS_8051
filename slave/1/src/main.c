@@ -17,7 +17,16 @@ void main(void)
         // // gfx_line(235, 4, 4, 123);
 
         const __code unsigned char x_sprite[] = { 0x88, 0x50, 0x20, 0x50, 0x88 };
-        gfx_bitmap(10, 10, 5, 5, x_sprite);
+
+
+        const __code unsigned char bitmap[] = {
+            0x00, 0x00, 0x7F, 0xFC, 0x7F, 0xFC, 0x7F, 0xFC, 0x7F, 0xFC, 0x00, 0x3C,
+            0x00, 0x3C, 0x00, 0x3C, 0x00, 0x3C, 0x00, 0x3C, 0x00, 0x3C, 0x00, 0x3C,
+            0x00, 0x3C, 0x00, 0x3C, 0x00, 0x00
+        };
+        gfx_bitmap(10, 10, 15, 15, bitmap);
+
+
 
         // gfx_circle(120, 64, 40);           /* centred hollow circle       */
         // gfx_fill_circle(120, 64, 15);      /* solid inner dot             */

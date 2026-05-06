@@ -1,9 +1,14 @@
 #include "gpu.h"
 #include "graphics.h"
 
-#define MAX_BITMAP_SIZE 1024
+#define MAX_BITMAP_SIZE 64
 __xdata unsigned char bitmap_buffer[MAX_BITMAP_SIZE];
 
+const __code unsigned char bitmap[] = {
+0x00, 0x00, 0x7F, 0xFC, 0x7F, 0xFC, 0x7F, 0xFC, 0x7F, 0xFC, 0x00, 0x3C,
+0x00, 0x3C, 0x00, 0x3C, 0x00, 0x3C, 0x00, 0x3C, 0x00, 0x3C, 0x00, 0x3C,
+0x00, 0x3C, 0x00, 0x3C, 0x00, 0x00
+};
 
 unsigned char gpu_receive_byte() {
     unsigned char val;
@@ -24,43 +29,54 @@ unsigned char gpu_receive_byte() {
 void gpu_process_commands() {
     unsigned char cmd;
     
+    unsigned char x, y, w, h;
+    unsigned int n_bytes, i;
     while(1) {
         cmd = gpu_receive_byte(); // Get Command ID
-        unsigned char x, y, w, h;
-        unsigned int n_bytes, i;
         
         switch(cmd) {
             case CMD_LINE:
-                // Direct calls to receivers for parameters
-                gfx_line(gpu_receive_byte(), gpu_receive_byte(), 
-                         gpu_receive_byte(), gpu_receive_byte());
-                break;
-                
+            // Direct calls to receivers for parameters
+            x = gpu_receive_byte();
+            y = gpu_receive_byte();
+            w = gpu_receive_byte();
+            h = gpu_receive_byte();
+            gfx_line(x, y, w, h);
+            break;
+            
             case CMD_CIRCLE:
                 gfx_circle(gpu_receive_byte(), gpu_receive_byte(), 
                            gpu_receive_byte());
                 break;
-            case CMD_RECT:
+                case CMD_RECT:
                 gfx_rect(gpu_receive_byte(), gpu_receive_byte(),
                          gpu_receive_byte(), gpu_receive_byte());
                 break;
+            
+            case CMD_FIXED:
+                gfx_bitmap(10, 10, 15, 15, bitmap);
+                break;
                 
             case CMD_BITMAP:
-                P3_0 = 0; // Debug: Set pin low at start of bitmap command
                 x = gpu_receive_byte();
                 y = gpu_receive_byte();
                 w = gpu_receive_byte();
                 h = gpu_receive_byte();
-                n_bytes = ((unsigned int)(w + 7u) / 8u) * (unsigned int)h;
-                if (n_bytes > MAX_BITMAP_SIZE) n_bytes = MAX_BITMAP_SIZE;
+
+                // Use 16-bit math for the count
+                n_bytes = ((unsigned int)w + 7u) / 8u * (unsigned int)h;
+
+                P3_0 = 0; // Debug: Start receiving bytes
                 for (i = 0; i < n_bytes; i++) {
+                    unsigned char b = gpu_receive_byte();
                     if (i < MAX_BITMAP_SIZE) {
-                        bitmap_buffer[i] = gpu_receive_byte();
+                        bitmap_buffer[i] = b;
                     }
                 }
-                P3_0 = 1; // Debug: Set pin high after receiving bitmap data
-                
-                gfx_bitmap(x, y, w, h, bitmap_buffer);
+                P3_0 = 1; // Debug: Receiving finished
+
+                // Draw using the RAM buffer
+                gfx_bitmap(x, y, w, h, bitmap_buffer); 
                 break;
                 
             case CMD_CLS:
