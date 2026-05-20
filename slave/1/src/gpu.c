@@ -52,7 +52,7 @@ void gpu_process_commands() {
                 break;
             
             case CMD_FIXED:
-                gfx_bitmap_xdata(10, 10, 15, 15, bitmap_buffer);
+                gfx_bitmap_idata(10, 10, 15, 15, bitmap_buffer);
                 break;
                 
             case CMD_BITMAP:
@@ -74,7 +74,7 @@ void gpu_process_commands() {
                 P3_0 = 1; // Debug: Receiving finished
 
                 // Draw using the RAM buffer
-                gfx_bitmap_xdata(x, y, w, h, bitmap_buffer); 
+                gfx_bitmap_idata(x, y, w, h, bitmap_buffer); 
                 break;
                 
             case CMD_CLS:

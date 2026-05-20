@@ -2,7 +2,7 @@
 -i @LINKER_IHX_FILE@
 -M
 -b HOME = 0x0000
--b XSEG = 0x0001
+-b XSEG = 0x0000
 -b PSEG = 0x0001
 -b ISEG = 0x0000
 -b BSEG = 0x0000

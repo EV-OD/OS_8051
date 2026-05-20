@@ -436,11 +436,11 @@ void gfx_invert_rect(unsigned char x1, unsigned char y1,
  * small sprites.  For large bitmaps consider byte-aligned blitting.
  * ═══════════════════════════════════════════════════════════════ */
 // =========================================================================
-// 1. FOR DYNAMIC RAM ARRAYS (__xdata)
+// 1. FOR DYNAMIC RAM ARRAYS (__idata)
 // =========================================================================
-void gfx_bitmap_xdata(unsigned char x,    unsigned char y,
+void gfx_bitmap_idata(unsigned char x,    unsigned char y,
                       unsigned char w,    unsigned char h,
-                      const unsigned char __idata *data) // Explicit 2-byte XDATA pointer
+                      const unsigned char __idata *data) // Explicit 2-byte iDATA pointer
 {
     unsigned char row, col;
     unsigned char bytes_per_row;

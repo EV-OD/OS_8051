@@ -124,7 +124,7 @@ void gfx_invert_rect(unsigned char x1, unsigned char y1,
 //                 unsigned char __xdata *data);
 
 
-void gfx_bitmap_xdata(unsigned char x,    unsigned char y,
+void gfx_bitmap_idata(unsigned char x,    unsigned char y,
                       unsigned char w,    unsigned char h,
                       const unsigned char __idata *data);
 
