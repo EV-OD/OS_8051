@@ -46,9 +46,32 @@ void gpu_process_commands() {
                 gfx_circle(gpu_receive_byte(), gpu_receive_byte(), 
                            gpu_receive_byte());
                 break;
-                case CMD_RECT:
+
+            case CMD_RECT:
                 gfx_rect(gpu_receive_byte(), gpu_receive_byte(),
                          gpu_receive_byte(), gpu_receive_byte());
+                break;
+
+            case CMD_FILL_RECT:
+                gfx_fill_rect(gpu_receive_byte(), gpu_receive_byte(),
+                              gpu_receive_byte(), gpu_receive_byte());
+                break;
+
+            case CMD_CLEAR_RECT:
+                gfx_clear_rect(gpu_receive_byte(), gpu_receive_byte(),
+                               gpu_receive_byte(), gpu_receive_byte());
+                break;
+
+            case CMD_INVERT_RECT:
+                gfx_invert_rect(gpu_receive_byte(), gpu_receive_byte(),
+                                gpu_receive_byte(), gpu_receive_byte());
+                break;
+
+            case CMD_PIXEL:
+                x = gpu_receive_byte();
+                y = gpu_receive_byte();
+                w = gpu_receive_byte();
+                gfx_pixel(x, y, w);
                 break;
             
             case CMD_FIXED:

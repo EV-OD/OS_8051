@@ -3,83 +3,68 @@
 #include "keyboard_controller.h"
 
 
+#define SCREEN_W 240u
+#define SCREEN_H 128u
+
+#define RECT_W 10u
+#define RECT_H 10u
+#define STEP   5u
+
 void main(void)
 {
     m_entry();
     STB = 1;
     keyboard_init();
 
-    __bit started = 0;
-    __bit shouldGoToNext = 0;
-    unsigned char nextcounter = 0;
-    gpu_cls();
-    
-    for (;;)
     {
-        KEY_STATE key = isKeyPressed();
-        switch (key) {
-            case START:
-                if (!started) {
-                    gpu_draw_rect(50, 50, 150, 150);
-                    started = 1;
-                }
-                break;
-            case NEXT:
-                if (started){
-                    if (nextcounter == 0){
-                        gpu_cls();
-                    }else if (nextcounter == 1){
-                        gpu_draw_rect(50, 50, 100, 100);
-                    }else if (nextcounter == 2){
-                        gpu_draw_line(0, 127, 239, 0);
-                    }else if (nextcounter == 3){
-                        const __code unsigned char bitmap[] = {
-                            0x00, 0x00, 0x7F, 0xFC, 0x7F, 0xFC, 0x7F,
-                            0xFC, 0x7F, 0xFC, 0x00, 0x3C,
-                            0x00, 0x3C, 0x00, 0x3C, 0x00, 0x3C, 0x00,
-                            0x3C, 0x00, 0x3C, 0x00, 0x3C,
-                            0x00, 0x3C, 0x00, 0x3C, 0x00, 0x00
-                        };
-                        gpu_draw_bitmap(10, 10, 15, 15, bitmap);
-                    }
-                    else if (nextcounter == 4){
-                        //    make home
-                        gpu_draw_line(0, 127, 239, 0);
-                        gpu_draw_line(0, 0, 239, 127);
-                        gpu_draw_rect(50, 50, 150, 150);
-                        
-                    }
-                    nextcounter = (nextcounter + 1) % 5;
-                }
-                break;
-            default:
-                gpu_draw_circle(120, 64, 30);
-                break;
+        unsigned char x = 50u;
+        unsigned char y = 50u;
+
+        const unsigned char max_x = (unsigned char)(SCREEN_W - (unsigned char)RECT_W);
+        const unsigned char max_y = (unsigned char)(SCREEN_H - (unsigned char)RECT_H);
+
+        if (x > max_x) x = max_x;
+        if (y > max_y) y = max_y;
+
+        gpu_cls();
+        gpu_draw_rect(x, y, (unsigned char)RECT_W, (unsigned char)RECT_H);
+
+        for (;;)
+        {
+            __bit moved = 0;
+            unsigned char old_x = x;
+            unsigned char old_y = y;
+            KEY_STATE key = isKeyPressed();
+
+            switch (key) {
+                case UP:
+                    if (y >= (unsigned char)STEP) y = (unsigned char)(y - (unsigned char)STEP);
+                    else y = 0u;
+                    moved = 1;
+                    break;
+                case DOWN:
+                    if (y <= (unsigned char)(max_y - (unsigned char)STEP)) y = (unsigned char)(y + (unsigned char)STEP);
+                    else y = max_y;
+                    moved = 1;
+                    break;
+                case LEFT:
+                    if (x >= (unsigned char)STEP) x = (unsigned char)(x - (unsigned char)STEP);
+                    else x = 0u;
+                    moved = 1;
+                    break;
+                case RIGHT:
+                    if (x <= (unsigned char)(max_x - (unsigned char)STEP)) x = (unsigned char)(x + (unsigned char)STEP);
+                    else x = max_x;
+                    moved = 1;
+                    break;
+                default:
+                    break;
+            }
+
+            if (moved) {
+                gpu_clear_rect(old_x, old_y, (unsigned char)RECT_W, (unsigned char)RECT_H);
+                gpu_draw_rect(x, y, (unsigned char)RECT_W, (unsigned char)RECT_H);
+            }
         }
-        
-
-        // gpu_draw_line(0, 0, 239, 127);
-        // gpu_draw_rect(50, 50, 100, 100);
-        // gpu_draw_line(0, 127, 239, 0);
-
-        // gpu_draw_fixed();
-    
-
-
-
-        
-        // 8051 Bitmap - 15x15 pixels
-        // Orientation: Horizontal, MSB-first
-        // Bytes per row: 2 | Total bytes: 30
-        // const __code unsigned char bitmap[] = {
-        //     0x00, 0x00, 0x7F, 0xFC, 0x7F, 0xFC, 0x7F, 0xFC, 0x7F, 0xFC, 0x00, 0x3C,
-        //     0x00, 0x3C, 0x00, 0x3C, 0x00, 0x3C, 0x00, 0x3C, 0x00, 0x3C, 0x00, 0x3C,
-        //     0x00, 0x3C, 0x00, 0x3C, 0x00, 0x00
-        // };
-
-        
-        
-        // gpu_draw_bitmap(10, 10, 15, 15, bitmap);
-        
     }
 }

@@ -18,6 +18,11 @@
 #define CMD_PIXEL    0x06
 #define CMD_FIXED    0x07
 
+// Extended rectangle commands (x1, y1, x2, y2)
+#define CMD_FILL_RECT   0x08
+#define CMD_CLEAR_RECT  0x09
+#define CMD_INVERT_RECT 0x0A
+
 /* ═══════════════════════════════════════════════════════════════
  * CORE COMMUNICATION & CONTROL
  * ═══════════════════════════════════════════════════════════════ */

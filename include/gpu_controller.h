@@ -17,6 +17,11 @@
 #define CMD_PIXEL    0x06
 #define CMD_FIXED    0x07
 
+// Extended rectangle commands (x1, y1, x2, y2)
+#define CMD_FILL_RECT   0x08
+#define CMD_CLEAR_RECT  0x09
+#define CMD_INVERT_RECT 0x0A
+
 /**
  * Internal helper to send a single byte with a hardware handshake.
  */
@@ -61,14 +66,66 @@ void gpu_draw_circle(unsigned char x, unsigned char y, unsigned char r) {
     gpu_write(r);
 }
 
-/* Draw Rectangle: x, y, width, height */
-void gpu_draw_rect(unsigned char x, unsigned char y, 
+/*
+ * Rectangle note:
+ * The slave-side `gfx_rect()` expects (x1,y1,x2,y2) corners (inclusive),
+ * not (x,y,width,height). These helpers accept width/height and convert.
+ */
+static void gpu_rect_send_xyxy(unsigned char cmd,
+                              unsigned char x1, unsigned char y1,
+                              unsigned char x2, unsigned char y2)
+{
+    gpu_write(cmd);
+    gpu_write(x1);
+    gpu_write(y1);
+    gpu_write(x2);
+    gpu_write(y2);
+}
+
+static void gpu_rect_send_wh(unsigned char cmd,
+                            unsigned char x, unsigned char y,
+                            unsigned char w, unsigned char h)
+{
+    unsigned int x2u;
+    unsigned int y2u;
+    unsigned char x2;
+    unsigned char y2;
+
+    if (w == 0u || h == 0u) {
+        return;
+    }
+
+    x2u = (unsigned int)x + (unsigned int)w - 1u;
+    y2u = (unsigned int)y + (unsigned int)h - 1u;
+
+    x2 = (x2u >= 240u) ? 239u : (unsigned char)x2u;
+    y2 = (y2u >= 128u) ? 127u : (unsigned char)y2u;
+
+    gpu_rect_send_xyxy(cmd, x, y, x2, y2);
+}
+
+/* Draw hollow rectangle (outline): x, y, width, height */
+void gpu_draw_rect(unsigned char x, unsigned char y,
                    unsigned char w, unsigned char h) {
-    gpu_write(CMD_RECT);
-    gpu_write(x);
-    gpu_write(y);
-    gpu_write(w);
-    gpu_write(h);
+    gpu_rect_send_wh(CMD_RECT, x, y, w, h);
+}
+
+/* Draw solid filled rectangle: x, y, width, height */
+void gpu_fill_rect(unsigned char x, unsigned char y,
+                   unsigned char w, unsigned char h) {
+    gpu_rect_send_wh(CMD_FILL_RECT, x, y, w, h);
+}
+
+/* Clear (erase) a rectangle region: x, y, width, height */
+void gpu_clear_rect(unsigned char x, unsigned char y,
+                    unsigned char w, unsigned char h) {
+    gpu_rect_send_wh(CMD_CLEAR_RECT, x, y, w, h);
+}
+
+/* Invert a rectangle region: x, y, width, height */
+void gpu_invert_rect(unsigned char x, unsigned char y,
+                     unsigned char w, unsigned char h) {
+    gpu_rect_send_wh(CMD_INVERT_RECT, x, y, w, h);
 }
 
 /* Set Pixel: x, y, state (1=Set, 0=Clear) */
