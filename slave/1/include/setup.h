@@ -67,6 +67,14 @@
 
 #define GR_SIZE     ((unsigned int)(COLS) * (unsigned int)(LCD_PIXEL_H))
 
+  /* Optional double-buffer layout (page flipping)
+   * Page0 graphic home: GR_HOME
+   * Page1 graphic home: GR_HOME + GR_SIZE
+   * Requires enough external display RAM for 2*GR_SIZE bytes.
+   */
+  #define GR_PAGE0_HOME (GR_HOME)
+  #define GR_PAGE1_HOME (GR_HOME + GR_SIZE)
+
 /* ═══════════════════════════════════════════════════════════════
  * 3. T6963C COMMAND CODES
  * ═══════════════════════════════════════════════════════════════ */
@@ -156,6 +164,10 @@ void lcd_clear_text(void);
  * Fill the entire graphic area with 0x00 (all pixels off).
  */
 void lcd_clear_graphic(void);
+
+/* Page flip helpers (avoid 16-bit parameters to save OSEG RAM) */
+void lcd_set_graphic_page(unsigned char page);
+void lcd_clear_graphic_page(unsigned char page);
 
 /*
  * lcd_clear_all()

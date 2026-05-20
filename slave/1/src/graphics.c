@@ -4,6 +4,17 @@
 
 #include "graphics.h"
 
+__idata unsigned int gfx_gr_home = GR_HOME;
+
+void gfx_set_draw_page(unsigned char page)
+{
+    if (page) {
+        gfx_gr_home = GR_PAGE1_HOME;
+    } else {
+        gfx_gr_home = GR_PAGE0_HOME;
+    }
+}
+
 /* ═══════════════════════════════════════════════════════════════
  * INTERNAL HELPERS
  * ═══════════════════════════════════════════════════════════════ */
@@ -426,89 +437,3 @@ void gfx_invert_rect(unsigned char x1, unsigned char y1,
     }
 }
 
-/* ═══════════════════════════════════════════════════════════════
- * gfx_bitmap
- *
- * Blits a packed 1bpp bitmap (MSB = leftmost pixel, rows
- * stored contiguously, ceil(w/8) bytes per row).
- *
- * For simplicity this uses gfx_pixel per bit — adequate for
- * small sprites.  For large bitmaps consider byte-aligned blitting.
- * ═══════════════════════════════════════════════════════════════ */
-// =========================================================================
-// 1. FOR DYNAMIC RAM ARRAYS (__idata)
-// =========================================================================
-void gfx_bitmap_idata(unsigned char x,    unsigned char y,
-                      unsigned char w,    unsigned char h,
-                      const unsigned char __idata *data) // Explicit 2-byte iDATA pointer
-{
-    unsigned char row, col;
-    unsigned char bytes_per_row;
-    unsigned char byte_val, bit_mask;
-    unsigned int  src_offset;
-
-    if (!data || w == 0 || h == 0) return;
-
-    bytes_per_row = (unsigned char)((w + 7u) / 8u);
-
-    for (row = 0; row < h; row++)
-    {
-        if ((unsigned int)(y + row) >= LCD_PIXEL_H) break;
-
-        src_offset = (unsigned int)row * (unsigned int)bytes_per_row;
-
-        for (col = 0; col < w; col++)
-        {
-            if ((unsigned int)(x + col) >= LCD_PIXEL_W) break;
-
-            // The compiler is forced to strictly generate a MOVX instruction here!
-            byte_val = data[src_offset + col / 8u];
-            bit_mask = (unsigned char)(0x80u >> (col % 8u));
-
-            gfx_pixel(
-                (unsigned char)(x + col),
-                (unsigned char)(y + row),
-                (byte_val & bit_mask) ? PIXEL_SET : PIXEL_CLEAR
-            );
-        }
-    }
-}
-
-// =========================================================================
-// 2. FOR CONSTANT FLASH ARRAYS (__code)
-// =========================================================================
-void gfx_bitmap_code(unsigned char x,    unsigned char y,
-                     unsigned char w,    unsigned char h,
-                     const unsigned char __code *data) // Explicit 2-byte CODE pointer
-{
-    unsigned char row, col;
-    unsigned char bytes_per_row;
-    unsigned char byte_val, bit_mask;
-    unsigned int  src_offset;
-
-    if (!data || w == 0 || h == 0) return;
-
-    bytes_per_row = (unsigned char)((w + 7u) / 8u);
-
-    for (row = 0; row < h; row++)
-    {
-        if ((unsigned int)(y + row) >= LCD_PIXEL_H) break;
-
-        src_offset = (unsigned int)row * (unsigned int)bytes_per_row;
-
-        for (col = 0; col < w; col++)
-        {
-            if ((unsigned int)(x + col) >= LCD_PIXEL_W) break;
-
-            // The compiler is forced to strictly generate a MOVC instruction here!
-            byte_val = data[src_offset + col / 8u];
-            bit_mask = (unsigned char)(0x80u >> (col % 8u));
-
-            gfx_pixel(
-                (unsigned char)(x + col),
-                (unsigned char)(y + row),
-                (byte_val & bit_mask) ? PIXEL_SET : PIXEL_CLEAR
-            );
-        }
-    }
-}

@@ -23,6 +23,12 @@
 #define CMD_CLEAR_RECT  0x09
 #define CMD_INVERT_RECT 0x0A
 
+// Page flipping / double-buffer control
+#define CMD_SET_DRAW_PAGE    0x0B
+#define CMD_SET_DISPLAY_PAGE 0x0C
+#define CMD_SWAP_PAGES       0x0D
+#define CMD_CLEAR_DRAW_PAGE  0x0E
+
 /* ═══════════════════════════════════════════════════════════════
  * CORE COMMUNICATION & CONTROL
  * ═══════════════════════════════════════════════════════════════ */

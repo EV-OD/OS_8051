@@ -20,20 +20,33 @@ void main(void)
         unsigned char x = 50u;
         unsigned char y = 50u;
 
+        unsigned char draw_page = 1u;
+        unsigned char page_x[2] = { 50u, 50u };
+        unsigned char page_y[2] = { 50u, 50u };
+
         const unsigned char max_x = (unsigned char)(SCREEN_W - (unsigned char)RECT_W);
         const unsigned char max_y = (unsigned char)(SCREEN_H - (unsigned char)RECT_H);
 
         if (x > max_x) x = max_x;
         if (y > max_y) y = max_y;
 
-        gpu_cls();
+        /* Init both pages with the same initial box */
+        gpu_set_draw_page(0u);
+        gpu_clear_draw_page();
         gpu_fill_rect(x, y, (unsigned char)RECT_W, (unsigned char)RECT_H);
+
+        gpu_set_draw_page(1u);
+        gpu_clear_draw_page();
+        gpu_fill_rect(x, y, (unsigned char)RECT_W, (unsigned char)RECT_H);
+
+        gpu_set_display_page(0u);
+        gpu_set_draw_page(1u);
 
         for (;;)
         {
             __bit moved = 0;
-            unsigned char old_x = x;
-            unsigned char old_y = y;
+            unsigned char old_x = page_x[draw_page];
+            unsigned char old_y = page_y[draw_page];
             KEY_STATE key = isKeyPressed();
 
             switch (key) {
@@ -64,6 +77,12 @@ void main(void)
             if (moved) {
                 gpu_clear_rect(old_x, old_y, (unsigned char)RECT_W, (unsigned char)RECT_H);
                 gpu_fill_rect(x, y, (unsigned char)RECT_W, (unsigned char)RECT_H);
+
+                page_x[draw_page] = x;
+                page_y[draw_page] = y;
+
+                gpu_swap_pages();
+                draw_page ^= 1u;
             }
         }
     }

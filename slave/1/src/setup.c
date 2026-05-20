@@ -89,6 +89,32 @@ void lcd_clear_graphic(void)
     lcd_auto_reset();
 }
 
+void lcd_set_graphic_page(unsigned char page)
+{
+    if (page) {
+        send_word_cmd(GR_PAGE1_HOME, CMD_GR_HOME_ADDR);
+    } else {
+        send_word_cmd(GR_PAGE0_HOME, CMD_GR_HOME_ADDR);
+    }
+}
+
+void lcd_clear_graphic_page(unsigned char page)
+{
+    static __idata unsigned int i;
+
+    if (page) {
+        lcd_set_addr(GR_PAGE1_HOME);
+    } else {
+        lcd_set_addr(GR_PAGE0_HOME);
+    }
+    lcd_write_cmd(CMD_AUTO_WRITE);
+
+    for (i = 0; i < GR_SIZE; i++)
+        lcd_auto_write(0x00u);
+
+    lcd_auto_reset();
+}
+
 /* ─────────────────────────────────────────────────────────────
  * lcd_clear_all
  * ───────────────────────────────────────────────────────────── */

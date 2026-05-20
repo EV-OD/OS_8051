@@ -33,10 +33,16 @@
 
 /* Precomputed address of the byte containing pixel (x,y) */
 #define GR_BYTE_ADDR(x, y) \
-    (GR_HOME + (unsigned int)(y) * (unsigned int)(COLS) + (unsigned int)(x) / 8u)
+    (gfx_gr_home + (unsigned int)(y) * (unsigned int)(COLS) + (unsigned int)(x) / 8u)
 
 /* Bit position within that byte (0 = LSB, 7 = MSB / leftmost) */
 #define GR_BIT_POS(x)   (7u - ((unsigned int)(x) % 8u))
+
+/* Current graphic draw base (home address). Used by GR_BYTE_ADDR(). */
+extern __idata unsigned int gfx_gr_home;
+
+/* Select which graphic page drawing functions write into (0 or 1). */
+void gfx_set_draw_page(unsigned char page);
 
 /* ═══════════════════════════════════════════════════════════════
  * PRIMITIVE DRAWING FUNCTIONS
@@ -112,24 +118,5 @@ void gfx_clear_rect(unsigned char x1, unsigned char y1,
  */
 void gfx_invert_rect(unsigned char x1, unsigned char y1,
                      unsigned char x2, unsigned char y2);
-
-/*
- * gfx_bitmap(x, y, w, h, data)
- * Blit a monochrome bitmap.
- * data: packed array, MSB-first, row-major, ceil(w/8) bytes per row.
- * Pixels outside the screen are clipped silently.
- */
-// void gfx_bitmap(unsigned char x,    unsigned char y,
-//                 unsigned char w,    unsigned char h,
-//                 unsigned char __xdata *data);
-
-
-void gfx_bitmap_idata(unsigned char x,    unsigned char y,
-                      unsigned char w,    unsigned char h,
-                      const unsigned char __idata *data);
-
-void gfx_bitmap_code(unsigned char x,    unsigned char y,
-                     unsigned char w,    unsigned char h,
-                     const unsigned char __code *data);
 
 #endif /* GRAPHICS_H */

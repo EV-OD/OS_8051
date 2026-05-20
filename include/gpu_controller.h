@@ -22,6 +22,12 @@
 #define CMD_CLEAR_RECT  0x09
 #define CMD_INVERT_RECT 0x0A
 
+// Page flipping / double-buffer control
+#define CMD_SET_DRAW_PAGE    0x0B
+#define CMD_SET_DISPLAY_PAGE 0x0C
+#define CMD_SWAP_PAGES       0x0D
+#define CMD_CLEAR_DRAW_PAGE  0x0E
+
 /**
  * Internal helper to send a single byte with a hardware handshake.
  */
@@ -126,6 +132,32 @@ void gpu_clear_rect(unsigned char x, unsigned char y,
 void gpu_invert_rect(unsigned char x, unsigned char y,
                      unsigned char w, unsigned char h) {
     gpu_rect_send_wh(CMD_INVERT_RECT, x, y, w, h);
+}
+
+/* Select which graphic page subsequent drawing commands write to. */
+void gpu_set_draw_page(unsigned char page)
+{
+    gpu_write(CMD_SET_DRAW_PAGE);
+    gpu_write(page);
+}
+
+/* Select which graphic page is currently displayed. */
+void gpu_set_display_page(unsigned char page)
+{
+    gpu_write(CMD_SET_DISPLAY_PAGE);
+    gpu_write(page);
+}
+
+/* Atomically swap display and draw pages (toggles 0<->1). */
+void gpu_swap_pages(void)
+{
+    gpu_write(CMD_SWAP_PAGES);
+}
+
+/* Clear the current draw page (entire graphic plane). */
+void gpu_clear_draw_page(void)
+{
+    gpu_write(CMD_CLEAR_DRAW_PAGE);
 }
 
 /* Set Pixel: x, y, state (1=Set, 0=Clear) */

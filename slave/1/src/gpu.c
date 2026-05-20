@@ -1,8 +1,10 @@
 #include "gpu.h"
 #include "graphics.h"
 
-#define MAX_BITMAP_SIZE 64
-__idata unsigned char bitmap_buffer[] = {
+static __idata unsigned char display_page = 0u;
+static __idata unsigned char draw_page = 0u;
+
+static const unsigned char __code fixed_bitmap[] = {
     0x00, 0x00, 0x7F, 0xFC, 0x7F, 0xFC, 0x7F, 0xFC, 0x7F, 0xFC, 0x00, 0x3C,
     0x00, 0x3C, 0x00, 0x3C, 0x00, 0x3C, 0x00, 0x3C, 0x00, 0x3C, 0x00, 0x3C,
     0x00, 0x3C, 0x00, 0x3C, 0x00, 0x00
@@ -25,10 +27,15 @@ unsigned char gpu_receive_byte() {
 
 
 void gpu_process_commands() {
-    unsigned char cmd;
+    __idata unsigned char cmd;
+
+    /* Ensure defaults are consistent */
+    display_page = 0u;
+    draw_page = 0u;
+    lcd_set_graphic_page(display_page);
+    gfx_set_draw_page(draw_page);
     
-    unsigned char x, y, w, h;
-    unsigned int n_bytes, i;
+    __idata unsigned char x, y, w, h;
     while(1) {
         cmd = gpu_receive_byte(); // Get Command ID
         
@@ -73,9 +80,67 @@ void gpu_process_commands() {
                 w = gpu_receive_byte();
                 gfx_pixel(x, y, w);
                 break;
+
+            case CMD_SET_DRAW_PAGE:
+                draw_page = (unsigned char)(gpu_receive_byte() & 1u);
+                gfx_set_draw_page(draw_page);
+                break;
+
+            case CMD_SET_DISPLAY_PAGE:
+                display_page = (unsigned char)(gpu_receive_byte() & 1u);
+                lcd_set_graphic_page(display_page);
+                break;
+
+            case CMD_SWAP_PAGES:
+                display_page ^= 1u;
+                draw_page ^= 1u;
+                lcd_set_graphic_page(display_page);
+                gfx_set_draw_page(draw_page);
+                break;
+
+            case CMD_CLEAR_DRAW_PAGE:
+                lcd_clear_graphic_page(draw_page);
+                break;
             
             case CMD_FIXED:
-                gfx_bitmap_idata(10, 10, 15, 15, bitmap_buffer);
+                /* Draw the built-in 15x15 test sprite (2 bytes/row). */
+                {
+                    __idata unsigned char row;
+                    __idata unsigned char byte_i;
+                    __idata unsigned char bit_i;
+                    __idata unsigned char col;
+                    __idata unsigned char yy;
+                    __idata unsigned char xx;
+                    __idata unsigned char b;
+                    __idata unsigned char idx;
+
+                    for (row = 0u; row < 15u; row++)
+                    {
+                        yy = (unsigned char)(10u + row);
+                        if (yy < 10u || yy >= LCD_PIXEL_H) continue;
+
+                        for (byte_i = 0u; byte_i < 2u; byte_i++)
+                        {
+                            idx = (unsigned char)((row << 1) + byte_i);
+                            b = fixed_bitmap[idx];
+
+                            for (bit_i = 0u; bit_i < 8u; bit_i++)
+                            {
+                                col = (unsigned char)((byte_i << 3) + bit_i);
+                                if (col >= 15u) break;
+
+                                xx = (unsigned char)(10u + col);
+                                if (xx < 10u || xx >= LCD_PIXEL_W) continue;
+
+                                gfx_pixel(
+                                    xx,
+                                    yy,
+                                    (b & (unsigned char)(0x80u >> bit_i)) ? PIXEL_SET : PIXEL_CLEAR
+                                );
+                            }
+                        }
+                    }
+                }
                 break;
                 
             case CMD_BITMAP:
@@ -84,20 +149,52 @@ void gpu_process_commands() {
                 w = gpu_receive_byte();
                 h = gpu_receive_byte();
 
-                // Use 16-bit math for the count
-                n_bytes = ((unsigned int)w + 7u) / 8u * (unsigned int)h;
+                /* Stream bitmap bytes directly (no RAM buffering).
+                 * Bitmap format: packed 1bpp, MSB=leftmost pixel.
+                 */
+                {
+                    __idata unsigned char row;
+                    __idata unsigned char byte_i;
+                    __idata unsigned char bit_i;
+                    __idata unsigned char bytes_per_row;
+                    __idata unsigned char b;
+                    __idata unsigned char col;
+                    __idata unsigned char yy;
+                    __idata unsigned char xx;
 
-                P3_0 = 0; // Debug: Start receiving bytes
-                for (i = 0; i < n_bytes; i++) {
-                    unsigned char b = gpu_receive_byte();
-                    if (i < MAX_BITMAP_SIZE) {
-                        bitmap_buffer[i] = b;
+                    if (w == 0u || h == 0u) break;
+
+                    /* ceil(w/8) without pulling in division helpers */
+                    bytes_per_row = (unsigned char)((w + 7u) >> 3);
+
+                    P3_0 = 0; // Debug: Start receiving bytes
+                    for (row = 0u; row < h; row++)
+                    {
+                        for (byte_i = 0u; byte_i < bytes_per_row; byte_i++)
+                        {
+                            b = gpu_receive_byte();
+
+                            /* If outside LCD bounds, still drain the stream. */
+                            yy = (unsigned char)(y + row);
+                            if (yy < y || yy >= LCD_PIXEL_H) continue;
+
+                            for (bit_i = 0u; bit_i < 8u; bit_i++)
+                            {
+                                col = (unsigned char)((byte_i << 3) + bit_i);
+                                if (col >= w) break;
+                                xx = (unsigned char)(x + col);
+                                if (xx < x || xx >= LCD_PIXEL_W) continue;
+
+                                gfx_pixel(
+                                    xx,
+                                    yy,
+                                    (b & (unsigned char)(0x80u >> bit_i)) ? PIXEL_SET : PIXEL_CLEAR
+                                );
+                            }
+                        }
                     }
+                    P3_0 = 1; // Debug: Receiving finished
                 }
-                P3_0 = 1; // Debug: Receiving finished
-
-                // Draw using the RAM buffer
-                gfx_bitmap_idata(x, y, w, h, bitmap_buffer); 
                 break;
                 
             case CMD_CLS:
