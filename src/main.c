@@ -6,8 +6,8 @@
 #define SCREEN_W 240u
 #define SCREEN_H 128u
 
-#define RECT_W 10u
-#define RECT_H 10u
+#define RECT_W 6u
+#define RECT_H 6u
 #define STEP   5u
 
 void main(void)
@@ -27,7 +27,7 @@ void main(void)
         if (y > max_y) y = max_y;
 
         gpu_cls();
-        gpu_draw_rect(x, y, (unsigned char)RECT_W, (unsigned char)RECT_H);
+        gpu_fill_rect(x, y, (unsigned char)RECT_W, (unsigned char)RECT_H);
 
         for (;;)
         {
@@ -63,7 +63,7 @@ void main(void)
 
             if (moved) {
                 gpu_clear_rect(old_x, old_y, (unsigned char)RECT_W, (unsigned char)RECT_H);
-                gpu_draw_rect(x, y, (unsigned char)RECT_W, (unsigned char)RECT_H);
+                gpu_fill_rect(x, y, (unsigned char)RECT_W, (unsigned char)RECT_H);
             }
         }
     }
