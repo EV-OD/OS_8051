@@ -3,8 +3,10 @@
 
 #include <reg51.h>
 
-#define STB P3_2
-#define BUSY P3_3
+#define STB P3_4
+#define BUSY P3_5
+#define KEYSET P2
+#define KEY_START P2_0
 
 #define GPU_DATA P1      // Data Bus
 
