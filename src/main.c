@@ -16,10 +16,7 @@ void main(void)
         gpu_draw_line(0, 127, 239, 0);
 
         gpu_draw_fixed();
-        
-        for (unsigned char i = 0; i < 100; i++) {
-            gpu_set_pixel(10 + i, 10 + i, 1);
-        }
+    
 
 
 

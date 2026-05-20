@@ -119,8 +119,17 @@ void gfx_invert_rect(unsigned char x1, unsigned char y1,
  * data: packed array, MSB-first, row-major, ceil(w/8) bytes per row.
  * Pixels outside the screen are clipped silently.
  */
-void gfx_bitmap(unsigned char x,    unsigned char y,
-                unsigned char w,    unsigned char h,
-                unsigned char *data);
+// void gfx_bitmap(unsigned char x,    unsigned char y,
+//                 unsigned char w,    unsigned char h,
+//                 unsigned char __xdata *data);
+
+
+void gfx_bitmap_xdata(unsigned char x,    unsigned char y,
+                      unsigned char w,    unsigned char h,
+                      const unsigned char __idata *data);
+
+void gfx_bitmap_code(unsigned char x,    unsigned char y,
+                     unsigned char w,    unsigned char h,
+                     const unsigned char __code *data);
 
 #endif /* GRAPHICS_H */

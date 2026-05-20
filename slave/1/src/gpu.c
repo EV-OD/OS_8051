@@ -2,12 +2,10 @@
 #include "graphics.h"
 
 #define MAX_BITMAP_SIZE 64
-__xdata unsigned char bitmap_buffer[MAX_BITMAP_SIZE];
-
-const __code unsigned char bitmap[] = {
-0x00, 0x00, 0x7F, 0xFC, 0x7F, 0xFC, 0x7F, 0xFC, 0x7F, 0xFC, 0x00, 0x3C,
-0x00, 0x3C, 0x00, 0x3C, 0x00, 0x3C, 0x00, 0x3C, 0x00, 0x3C, 0x00, 0x3C,
-0x00, 0x3C, 0x00, 0x3C, 0x00, 0x00
+__idata unsigned char bitmap_buffer[] = {
+    0x00, 0x00, 0x7F, 0xFC, 0x7F, 0xFC, 0x7F, 0xFC, 0x7F, 0xFC, 0x00, 0x3C,
+    0x00, 0x3C, 0x00, 0x3C, 0x00, 0x3C, 0x00, 0x3C, 0x00, 0x3C, 0x00, 0x3C,
+    0x00, 0x3C, 0x00, 0x3C, 0x00, 0x00
 };
 
 unsigned char gpu_receive_byte() {
@@ -54,7 +52,7 @@ void gpu_process_commands() {
                 break;
             
             case CMD_FIXED:
-                gfx_bitmap(10, 10, 15, 15, bitmap);
+                gfx_bitmap_xdata(10, 10, 15, 15, bitmap_buffer);
                 break;
                 
             case CMD_BITMAP:
@@ -76,7 +74,7 @@ void gpu_process_commands() {
                 P3_0 = 1; // Debug: Receiving finished
 
                 // Draw using the RAM buffer
-                gfx_bitmap(x, y, w, h, bitmap_buffer); 
+                gfx_bitmap_xdata(x, y, w, h, bitmap_buffer); 
                 break;
                 
             case CMD_CLS:
