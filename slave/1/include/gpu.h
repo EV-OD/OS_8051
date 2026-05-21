@@ -29,6 +29,9 @@
 #define CMD_SWAP_PAGES       0x0D
 #define CMD_CLEAR_DRAW_PAGE  0x0E
 
+// Text rendering (writes into LCD text plane)
+#define CMD_TEXT             0x0F
+
 /* ═══════════════════════════════════════════════════════════════
  * CORE COMMUNICATION & CONTROL
  * ═══════════════════════════════════════════════════════════════ */

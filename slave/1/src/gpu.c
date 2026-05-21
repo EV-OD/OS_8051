@@ -101,6 +101,76 @@ void gpu_process_commands() {
             case CMD_CLEAR_DRAW_PAGE:
                 lcd_clear_graphic_page(draw_page);
                 break;
+
+            case CMD_TEXT:
+                /* Stream a null-terminated ASCII string and write into TEXT RAM.
+                 * Params: col, row, bytes..., 0x00 terminator.
+                 * No buffering to keep internal RAM usage tiny.
+                 */
+                {
+                    __idata unsigned char col;
+                    __idata unsigned char row;
+                    __idata unsigned char ch;
+                    __idata unsigned int addr;
+
+                    col = gpu_receive_byte();
+                    row = gpu_receive_byte();
+
+                    /* If out of bounds, just drain the stream. */
+                    if (col >= COLS || row >= ROWS)
+                    {
+                        do { ch = gpu_receive_byte(); } while (ch != 0x00u);
+                        break;
+                    }
+
+                    addr = TXT_HOME
+                         + (unsigned int)row * (unsigned int)COLS
+                         + (unsigned int)col;
+
+                    lcd_set_addr(addr);
+                    lcd_write_cmd(CMD_AUTO_WRITE);
+
+                    while (1)
+                    {
+                        ch = gpu_receive_byte();
+                        if (ch == 0x00u) break;
+
+                        /* Basic control handling */
+                        if (ch == '\r')
+                            continue;
+                        if (ch == '\n')
+                        {
+                            col = 0u;
+                            row++;
+                            if (row >= ROWS) break;
+                            lcd_auto_reset();
+                            addr = TXT_HOME + (unsigned int)row * (unsigned int)COLS;
+                            lcd_set_addr(addr);
+                            lcd_write_cmd(CMD_AUTO_WRITE);
+                            continue;
+                        }
+
+                        /* Match lcd_puts() mapping for internal CGROM */
+                        if (ch >= 0x20u) ch = (unsigned char)(ch - 0x20u);
+
+                        lcd_auto_write(ch);
+                        col++;
+                        if (col >= COLS)
+                        {
+                            col = 0u;
+                            row++;
+                            if (row >= ROWS) break;
+
+                            lcd_auto_reset();
+                            addr = TXT_HOME + (unsigned int)row * (unsigned int)COLS;
+                            lcd_set_addr(addr);
+                            lcd_write_cmd(CMD_AUTO_WRITE);
+                        }
+                    }
+
+                    lcd_auto_reset();
+                }
+                break;
             
             case CMD_FIXED:
                 /* Draw the built-in 15x15 test sprite (2 bytes/row). */

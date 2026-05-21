@@ -28,10 +28,13 @@
 #define CMD_SWAP_PAGES       0x0D
 #define CMD_CLEAR_DRAW_PAGE  0x0E
 
+// Text rendering (writes into LCD text plane)
+#define CMD_TEXT             0x0F
+
 /**
  * Internal helper to send a single byte with a hardware handshake.
  */
-void gpu_write(unsigned char val) {
+void gpu_write(unsigned char val) __reentrant {
     // 1. Wait until the GPU is ready to receive a NEW byte
     while (BUSY == 1); 
 
@@ -50,13 +53,13 @@ void gpu_write(unsigned char val) {
 
 
 /* Clear Screen */
-void gpu_cls() {
+void gpu_cls() __reentrant {
     gpu_write(CMD_CLS);
 }
 
 /* Draw Line: x1, y1, x2, y2 */
 void gpu_draw_line(unsigned char x1, unsigned char y1, 
-                   unsigned char x2, unsigned char y2) {
+                   unsigned char x2, unsigned char y2) __reentrant {
     gpu_write(CMD_LINE);
     gpu_write(x1);
     gpu_write(y1);
@@ -65,7 +68,7 @@ void gpu_draw_line(unsigned char x1, unsigned char y1,
 }
 
 /* Draw Circle: x, y, radius */
-void gpu_draw_circle(unsigned char x, unsigned char y, unsigned char r) {
+void gpu_draw_circle(unsigned char x, unsigned char y, unsigned char r) __reentrant {
     gpu_write(CMD_CIRCLE);
     gpu_write(x);
     gpu_write(y);
@@ -80,6 +83,7 @@ void gpu_draw_circle(unsigned char x, unsigned char y, unsigned char r) {
 static void gpu_rect_send_xyxy(unsigned char cmd,
                               unsigned char x1, unsigned char y1,
                               unsigned char x2, unsigned char y2)
+                              __reentrant
 {
     gpu_write(cmd);
     gpu_write(x1);
@@ -91,6 +95,7 @@ static void gpu_rect_send_xyxy(unsigned char cmd,
 static void gpu_rect_send_wh(unsigned char cmd,
                             unsigned char x, unsigned char y,
                             unsigned char w, unsigned char h)
+                            __reentrant
 {
     unsigned int x2u;
     unsigned int y2u;
@@ -112,30 +117,31 @@ static void gpu_rect_send_wh(unsigned char cmd,
 
 /* Draw hollow rectangle (outline): x, y, width, height */
 void gpu_draw_rect(unsigned char x, unsigned char y,
-                   unsigned char w, unsigned char h) {
+                   unsigned char w, unsigned char h) __reentrant {
     gpu_rect_send_wh(CMD_RECT, x, y, w, h);
 }
 
 /* Draw solid filled rectangle: x, y, width, height */
 void gpu_fill_rect(unsigned char x, unsigned char y,
-                   unsigned char w, unsigned char h) {
+                   unsigned char w, unsigned char h) __reentrant {
     gpu_rect_send_wh(CMD_FILL_RECT, x, y, w, h);
 }
 
 /* Clear (erase) a rectangle region: x, y, width, height */
 void gpu_clear_rect(unsigned char x, unsigned char y,
-                    unsigned char w, unsigned char h) {
+                    unsigned char w, unsigned char h) __reentrant {
     gpu_rect_send_wh(CMD_CLEAR_RECT, x, y, w, h);
 }
 
 /* Invert a rectangle region: x, y, width, height */
 void gpu_invert_rect(unsigned char x, unsigned char y,
-                     unsigned char w, unsigned char h) {
+                     unsigned char w, unsigned char h) __reentrant {
     gpu_rect_send_wh(CMD_INVERT_RECT, x, y, w, h);
 }
 
 /* Select which graphic page subsequent drawing commands write to. */
 void gpu_set_draw_page(unsigned char page)
+    __reentrant
 {
     gpu_write(CMD_SET_DRAW_PAGE);
     gpu_write(page);
@@ -143,6 +149,7 @@ void gpu_set_draw_page(unsigned char page)
 
 /* Select which graphic page is currently displayed. */
 void gpu_set_display_page(unsigned char page)
+    __reentrant
 {
     gpu_write(CMD_SET_DISPLAY_PAGE);
     gpu_write(page);
@@ -150,27 +157,50 @@ void gpu_set_display_page(unsigned char page)
 
 /* Atomically swap display and draw pages (toggles 0<->1). */
 void gpu_swap_pages(void)
+    __reentrant
 {
     gpu_write(CMD_SWAP_PAGES);
 }
 
 /* Clear the current draw page (entire graphic plane). */
 void gpu_clear_draw_page(void)
+    __reentrant
 {
     gpu_write(CMD_CLEAR_DRAW_PAGE);
 }
 
 /* Set Pixel: x, y, state (1=Set, 0=Clear) */
-void gpu_set_pixel(unsigned char x, unsigned char y, unsigned char state) {
+void gpu_set_pixel(unsigned char x, unsigned char y, unsigned char state) __reentrant {
     gpu_write(CMD_PIXEL);
     gpu_write(x);
     gpu_write(y);
     gpu_write(state);
 }
 
-void gpu_draw_fixed(){
+void gpu_draw_fixed(void) __reentrant {
     gpu_write(CMD_FIXED);
 }
+
+/*
+ * Text sending helpers (macros) — keeps master internal RAM (DSEG) tiny.
+ *
+ * Protocol:
+ *   CMD_TEXT, col, row, 'H','i',..., 0x00
+ */
+#define gpu_text(col, row, str_ptr) do {             \
+    const unsigned char * _s = (str_ptr);            \
+    gpu_write(CMD_TEXT);                             \
+    gpu_write((unsigned char)(col));                 \
+    gpu_write((unsigned char)(row));                 \
+    if (_s) {                                        \
+        while (*_s) gpu_write(*_s++);                \
+    }                                                \
+    gpu_write(0x00u);                                \
+} while (0)
+
+/* Pixel coordinate convenience for default FONT_8x8 (x/8,y/8). */
+#define gpu_text_xy(x, y, str_ptr) \
+    gpu_text((unsigned char)((x) >> 3), (unsigned char)((y) >> 3), (str_ptr))
 
 
 
@@ -180,7 +210,7 @@ void gpu_draw_fixed(){
  */
 void gpu_draw_bitmap(unsigned char x, unsigned char y, 
                      unsigned char w, unsigned char h, 
-                     const __code unsigned char *bmp_data) {
+                     const __code unsigned char *bmp_data) __reentrant {
     unsigned int i;
 
     // Calculate how many bytes to send based on dimensions

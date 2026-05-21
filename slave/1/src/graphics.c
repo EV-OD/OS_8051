@@ -99,6 +99,35 @@ void gfx_pixel(unsigned char x, unsigned char y, unsigned char state)
 }
 
 /* ═══════════════════════════════════════════════════════════════
+ * TEXT HELPERS (text plane)
+ * ═══════════════════════════════════════════════════════════════ */
+
+void gfx_text(unsigned char col, unsigned char row, const unsigned char *str)
+{
+    lcd_puts(col, row, str);
+}
+
+void gfx_text_xy(unsigned char x, unsigned char y, const unsigned char *str)
+{
+    unsigned char col;
+    unsigned char row;
+
+    /* y -> text row: FONT_H is always 8 in this project */
+    row = (unsigned char)(y >> 3);
+
+    /* x -> text col: avoid pulling in division helpers */
+#if (FONT_W == 8)
+    col = (unsigned char)(x >> 3);
+#else
+    /* FONT_W == 6: compute x/6 via subtraction */
+    col = 0u;
+    while (x >= 6u) { x = (unsigned char)(x - 6u); col++; }
+#endif
+
+    lcd_puts(col, row, str);
+}
+
+/* ═══════════════════════════════════════════════════════════════
  * gfx_hline
  *
  * Strategy for a horizontal run from x1 to x2 on row y:

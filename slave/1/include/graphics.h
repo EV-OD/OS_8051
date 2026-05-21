@@ -119,4 +119,17 @@ void gfx_clear_rect(unsigned char x1, unsigned char y1,
 void gfx_invert_rect(unsigned char x1, unsigned char y1,
                      unsigned char x2, unsigned char y2);
 
+/* ═══════════════════════════════════════════════════════════════
+ * TEXT (T6963C text plane helpers)
+ *
+ * These write characters into the LCD's TEXT RAM (not pixels).
+ * Uses the controller's built-in character generator.
+ * ═══════════════════════════════════════════════════════════════ */
+
+/* Write a null-terminated ASCII string at text-grid position (col,row). */
+void gfx_text(unsigned char col, unsigned char row, const unsigned char *str);
+
+/* Convenience: convert pixel (x,y) to text cell and write string. */
+void gfx_text_xy(unsigned char x, unsigned char y, const unsigned char *str);
+
 #endif /* GRAPHICS_H */

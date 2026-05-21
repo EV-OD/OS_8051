@@ -75,5 +75,11 @@ KEY_STATE isKeyPressed(){
     return KEY_NONE;
 }
 
+/* Read and clear the raw latched key bitmask (can include multiple keys). */
+#define keyboard_read_mask(dst_mask) do { \
+    (dst_mask) = saved_key;             \
+    saved_key = 0x00;                  \
+} while (0)
+
 
 #endif /* KEYBOARD_CONTROLLER_H */
